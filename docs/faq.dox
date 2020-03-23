@@ -25,7 +25,7 @@ WebSocket++ clients can add a subprotocol to an outgoing connection by calling `
 
 In both caases, after the connection has been established, the selected subprotocol is available via the `websocketpp::connection::get_subprotocol` method.
 
-Note: some browsers will allow the connection to continue if they requested a subprotocol and your server doesn't select one. Others will reject the connection. 
+Note: some browsers will allow the connection to continue if they requested a subprotocol and your server doesn't select one. Others will reject the connection.
 
 ### How do I cleanly exit an Asio transport based program
 
@@ -72,13 +72,8 @@ To specify the type of an outgoing message, use the frame opcode values listed a
 ## Dependency Management
 
 ### Can WebSocket++ be used without Boost?
-Yes. WebSocket++ only uses Boost features as polyfills for C++11 language features and libraries. If you have a C++11 compiler and standard library you can use WebSocket++ without Boost. In most cases setting your build environment to use the C++11 (or later) language dialect is sufficient to enable this mode of use.
-
-With less common compilers (and sometimes very recently release compilers) there may be specific issues with certain libraries that aren't automatically detected by the library. For these situations there are additional defines available to fine tune which C++11 libraries and features are used. TODO: more details about them.
 
 For the iostream/raw transport the C++11 standard library is sufficient. For the Asio based transports, there is no C++11 library that provides the networking capabilaties that Asio does. As such even with a C++11 build system, you will need a standalone copy of Asio to use if Boost Asio is not available.
-
-MinGW users who want to avoid Boost should also consult the nearby question about MinGW compatibility.
 
 ### Can WebSocket++ be used with standalone Asio
 Yes. The process is the same as used with standalone Asio itself. Define `ASIO_STANDALONE` before including Asio or WebSocket++ headers. You will need to download a copy of the Asio headers separately (http://www.think-async.com) and make sure they are in your build system's include path.
@@ -92,9 +87,6 @@ The `<websocketpp/config/asio.hpp>` and `<websocketpp/config/asio_client.hpp>` h
 
 ### Build issues with TLS on recent versions of OS X
 Mac OS X ships a severely outdated version of the OpenSSL library. To securely use TLS with WebSocket++ on OS X you will need to install a modern version of OpenSSL via homebrew or compiling from source.
-
-### Can WebSocket++ be used with MinGW
-Generally, yes. Note that in C++11 mode MinGW does not currently support the C++11 STL `<thread>` library. WebSocket++ requires a thread/mutex library. Options include Boost thread (the default when a compatible C++11 `<thread>` can't be found) or `mingw-std-threads` (https://github.com/meganz/mingw-std-threads) by including those headers and defining `_WEBSOCKETPP_MINGW_THREAD_`.
 
 ## Compression
 
@@ -143,7 +135,7 @@ typedef websocketpp::client<deflate_client_config> client_endpoint_type;
 
 ## Security
 
-### Is it possible to terminate a malicious connection quickly, without tying up resources performing clean close steps, 
+### Is it possible to terminate a malicious connection quickly, without tying up resources performing clean close steps,
 
 Yes. The library will automatically detect and terminate connections that violate the WebSocket protocol. In cases where the library believes the remote endpoint to be malicious or sufficiently broken to be unlikely to understand or process the closing handshake, it will be omited.
 
@@ -152,11 +144,5 @@ If your application detects conditions above the protocol level that you believe
 - `websocketpp::close::status::force_tcp_drop`: Forcibly drop the TCP connection.
 
 Please note that usage of these disconnect methods results in a violation of the WebSocket protocol and may have negative reprocusions for the remote endpoint with respect to network timeouts. Please use caution when using them.
-
-## Build Issues
-
-### Getting compile errors related to `std::chrono`, `boost::chrono`, `waitable_timer`, or `steady_clock`
-
-Your build system may be confused about whether it is supposed to be using `boost::chrono` or `std::chrono`. Boost automatically detects this setup on some compilers but not others. Defining `BOOST_ASIO_HAS_STD_CHRONO` can help. See http://www.boost.org/doc/libs/1_60_0/doc/html/boost_asio/overview/cpp2011/chrono.html for more details.
 
 */

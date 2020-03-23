@@ -28,7 +28,6 @@
 #ifndef WEBSOCKETPP_EXTENSION_HPP
 #define WEBSOCKETPP_EXTENSION_HPP
 
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/system_error.hpp>
 
 #include <string>
@@ -62,7 +61,7 @@ class category : public lib::error_category {
 public:
     category() {}
 
-    const char *name() const _WEBSOCKETPP_NOEXCEPT_TOKEN_ {
+    const char *name() const noexcept {
         return "websocketpp.extension";
     }
 
@@ -91,12 +90,12 @@ inline lib::error_code make_error_code(error::value e) {
 } // namespace extensions
 } // namespace websocketpp
 
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_START_
+namespace std {
 template<> struct is_error_code_enum
     <websocketpp::extensions::error::value>
 {
     static const bool value = true;
 };
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_END_
+}
 
 #endif // WEBSOCKETPP_EXTENSION_HPP

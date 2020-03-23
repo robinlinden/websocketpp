@@ -25,15 +25,6 @@
  *
  */
 
- /**
-  * NOTES
-  *
-  * This example uses a number of standard classes through the websocketpp::lib
-  * namespace. This is to allow easy switching between Boost, the C++11 STL, and 
-  * the standalone Asio library. Your program need not use these namespaces if
-  * you do not need this sort of flexibility.
-  */
-
 #include <websocketpp/config/asio.hpp>
 
 #include <websocketpp/server.hpp>
@@ -42,13 +33,13 @@
 
 typedef websocketpp::server<websocketpp::config::asio_tls> server;
 
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
-using websocketpp::lib::bind;
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::bind;
 
 // pull out the type of messages sent by our config
 typedef websocketpp::config::asio::message_type::ptr message_ptr;
-typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
+typedef std::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
 
 void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
     std::cout << "on_message called with hdl: " << hdl.lock().get()
@@ -65,7 +56,7 @@ void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
 
 void on_http(server* s, websocketpp::connection_hdl hdl) {
     server::connection_ptr con = s->get_con_from_hdl(hdl);
-    
+
     con->set_body("Hello World!");
     con->set_status(websocketpp::http::status_code::ok);
 }
@@ -87,7 +78,7 @@ context_ptr on_tls_init(tls_mode mode, websocketpp::connection_hdl hdl) {
     std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
     std::cout << "using TLS mode: " << (mode == MOZILLA_MODERN ? "Mozilla Modern" : "Mozilla Intermediate") << std::endl;
 
-    context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::sslv23);
+    context_ptr ctx = std::make_shared<asio::ssl::context>(asio::ssl::context::sslv23);
 
     try {
         if (mode == MOZILLA_MODERN) {
@@ -106,21 +97,21 @@ context_ptr on_tls_init(tls_mode mode, websocketpp::connection_hdl hdl) {
         ctx->set_password_callback(bind(&get_password));
         ctx->use_certificate_chain_file("server.pem");
         ctx->use_private_key_file("server.pem", asio::ssl::context::pem);
-        
+
         // Example method of generating this file:
         // `openssl dhparam -out dh.pem 2048`
         // Mozilla Intermediate suggests 1024 as the minimum size to use
         // Mozilla Modern suggests 2048 as the minimum size to use.
         ctx->use_tmp_dh_file("dh.pem");
-        
+
         std::string ciphers;
-        
+
         if (mode == MOZILLA_MODERN) {
             ciphers = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK";
         } else {
             ciphers = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA";
         }
-        
+
         if (SSL_CTX_set_cipher_list(ctx->native_handle() , ciphers.c_str()) != 1) {
             std::cout << "Error setting cipher list" << std::endl;
         }

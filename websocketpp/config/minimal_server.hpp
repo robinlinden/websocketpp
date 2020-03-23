@@ -30,7 +30,6 @@
 
 // Non-Policy common stuff
 #include <websocketpp/common/platforms.hpp>
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/stdint.hpp>
 
 // Concurrency
@@ -82,7 +81,7 @@ namespace config {
  * <string>
  * <vector>
  *
- * C++11 STL or Boost
+ * C++11 STL
  * <memory>
  * <functional>
  * <system_error>
@@ -245,7 +244,7 @@ struct minimal_server {
     /// Default maximum message size
     /**
      * Default value for the processor's maximum message size. Maximum message size
-     * determines the point at which the library will fail a connection with the 
+     * determines the point at which the library will fail a connection with the
      * message_too_big protocol error.
      *
      * The default is 32MB

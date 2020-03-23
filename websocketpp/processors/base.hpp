@@ -32,7 +32,6 @@
 #include <websocketpp/utilities.hpp>
 #include <websocketpp/uri.hpp>
 
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/system_error.hpp>
 
 #include <string>
@@ -151,7 +150,7 @@ enum processor_errors {
 
     /// Extension related operation was ignored because extensions are disabled
     extensions_disabled,
-    
+
     /// Short Ke3 read. Hybi00 requires a third key to be read from the 8 bytes
     /// after the handshake. Less than 8 bytes were read.
     short_key3
@@ -162,7 +161,7 @@ class processor_category : public lib::error_category {
 public:
     processor_category() {}
 
-    char const * name() const _WEBSOCKETPP_NOEXCEPT_TOKEN_ {
+    char const * name() const noexcept {
         return "websocketpp.processor";
     }
 
@@ -289,11 +288,11 @@ inline close::status::value to_ws(lib::error_code ec) {
 } // namespace processor
 } // namespace websocketpp
 
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_START_
+namespace std {
 template<> struct is_error_code_enum<websocketpp::processor::error::processor_errors>
 {
     static bool const value = true;
 };
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_END_
+}
 
 #endif //WEBSOCKETPP_PROCESSOR_BASE_HPP

@@ -29,7 +29,6 @@
 #define WEBSOCKETPP_TRANSPORT_IOSTREAM_BASE_HPP
 
 #include <websocketpp/common/system_error.hpp>
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/functional.hpp>
 #include <websocketpp/common/connection_hdl.hpp>
 
@@ -86,7 +85,7 @@ class category : public lib::error_category {
     public:
     category() {}
 
-    char const * name() const _WEBSOCKETPP_NOEXCEPT_TOKEN_ {
+    char const * name() const noexcept {
         return "websocketpp.transport.iostream";
     }
 
@@ -123,11 +122,11 @@ inline lib::error_code make_error_code(error::value e) {
 } // namespace iostream
 } // namespace transport
 } // namespace websocketpp
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_START_
+namespace std {
 template<> struct is_error_code_enum<websocketpp::transport::iostream::error::value>
 {
     static bool const value = true;
 };
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_END_
+}
 
 #endif // WEBSOCKETPP_TRANSPORT_IOSTREAM_BASE_HPP

@@ -31,7 +31,6 @@
 
 
 // Non-Policy common stuff
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/stdint.hpp>
 
 // Concurrency
@@ -219,7 +218,7 @@ struct debug_core {
     /// Default maximum message size
     /**
      * Default value for the processor's maximum message size. Maximum message size
-     * determines the point at which the library will fail a connection with the 
+     * determines the point at which the library will fail a connection with the
      * message_too_big protocol error.
      *
      * The default is 32MB

@@ -32,7 +32,6 @@
 #include <string>
 #include <utility>
 
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/system_error.hpp>
 
 namespace websocketpp {
@@ -141,7 +140,7 @@ enum value {
 
     /// HTTP parse error
     http_parse_error,
-    
+
     /// Extension negotiation failed
     extension_neg_failed
 }; // enum value
@@ -151,7 +150,7 @@ class category : public lib::error_category {
 public:
     category() {}
 
-    char const * name() const _WEBSOCKETPP_NOEXCEPT_TOKEN_ {
+    char const * name() const noexcept {
         return "websocketpp";
     }
 
@@ -239,12 +238,12 @@ inline lib::error_code make_error_code(error::value e) {
 } // namespace error
 } // namespace websocketpp
 
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_START_
+namespace std {
 template<> struct is_error_code_enum<websocketpp::error::value>
 {
     static bool const value = true;
 };
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_END_
+}
 
 namespace websocketpp {
 

@@ -29,7 +29,6 @@
 #define WEBSOCKETPP_PROCESSOR_EXTENSION_PERMESSAGEDEFLATE_HPP
 
 
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/memory.hpp>
 #include <websocketpp/common/platforms.hpp>
 #include <websocketpp/common/stdint.hpp>
@@ -120,7 +119,7 @@ class category : public lib::error_category {
 public:
     category() {}
 
-    char const * name() const _WEBSOCKETPP_NOEXCEPT_TOKEN_ {
+    char const * name() const noexcept {
         return "websocketpp.extension.permessage-deflate";
     }
 
@@ -164,13 +163,13 @@ inline lib::error_code make_error_code(error::value e) {
 } // namespace extensions
 } // namespace websocketpp
 
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_START_
+namespace std {
 template<> struct is_error_code_enum
     <websocketpp::extensions::permessage_deflate::error::value>
 {
     static bool const value = true;
 };
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_END_
+}
 namespace websocketpp {
 namespace extensions {
 namespace permessage_deflate {
@@ -403,7 +402,7 @@ public:
      * NOTE: The permessage-deflate spec specifies that a value of 8 is allowed.
      * Prior to version 0.8.0 a value of 8 was also allowed by this library.
      * zlib, the deflate compression library that WebSocket++ uses has always
-     * silently adjusted a value of 8 to 9. In recent versions of zlib (1.2.9 
+     * silently adjusted a value of 8 to 9. In recent versions of zlib (1.2.9
      * and greater) a value of 8 is now explicitly rejected. WebSocket++ 0.8.0
      * continues to perform the 8->9 conversion for backwards compatibility
      * purposes but this should be considered deprecated functionality.
@@ -448,7 +447,7 @@ public:
      * NOTE: The permessage-deflate spec specifies that a value of 8 is allowed.
      * Prior to version 0.8.0 a value of 8 was also allowed by this library.
      * zlib, the deflate compression library that WebSocket++ uses has always
-     * silently adjusted a value of 8 to 9. In recent versions of zlib (1.2.9 
+     * silently adjusted a value of 8 to 9. In recent versions of zlib (1.2.9
      * and greater) a value of 8 is now explicitly rejected. WebSocket++ 0.8.0
      * continues to perform the 8->9 conversion for backwards compatibility
      * purposes but this should be considered deprecated functionality.

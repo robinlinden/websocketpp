@@ -6,8 +6,7 @@ At the top level, run cmake:
 
   cmake -G 'Unix Makefiles' \
      -D BUILD_EXAMPLES=ON \
-     -D WEBSOCKETPP_ROOT=/tmp/cm1 \
-     -D ENABLE_CPP11=OFF .
+     -D WEBSOCKETPP_ROOT=/tmp/cm1 .
 
 and then make the example:
 

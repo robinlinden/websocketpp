@@ -194,7 +194,7 @@ protected:
             return socket::make_error_code(socket::error::invalid_tls_context);
         }
         m_socket = lib::make_shared<socket_type>(
-            _WEBSOCKETPP_REF(*service),lib::ref(*m_context));
+            *service,lib::ref(*m_context));
 
         if (m_socket_init_handler) {
             m_socket_init_handler(m_hdl, get_socket());
@@ -233,7 +233,7 @@ protected:
      * @param callback Handler to call back with completion information
      */
     void pre_init(init_handler callback) {
-        // TODO: is this the best way to check whether this function is 
+        // TODO: is this the best way to check whether this function is
         //       available in the version of OpenSSL being used?
         // TODO: consider case where host is an IP address
 #if OPENSSL_VERSION_NUMBER >= 0x90812f

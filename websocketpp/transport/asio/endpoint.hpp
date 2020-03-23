@@ -115,19 +115,9 @@ public:
     }
 
     /// transport::asio objects are moveable but not copyable or assignable.
-    /// The following code sets this situation up based on whether or not we
-    /// have C++11 support or not
-#ifdef _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
     endpoint(const endpoint & src) = delete;
     endpoint& operator= (const endpoint & rhs) = delete;
-#else
-private:
-    endpoint(const endpoint & src);
-    endpoint & operator= (const endpoint & rhs);
-public:
-#endif // _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
 
-#ifdef _WEBSOCKETPP_MOVE_SEMANTICS_
     endpoint (endpoint && src)
       : config::socket_type(std::move(src))
       , m_tcp_pre_init_handler(src.m_tcp_pre_init_handler)
@@ -161,12 +151,11 @@ public:
             rhs.m_acceptor = NULL;
             rhs.m_listen_backlog = lib::asio::socket_base::max_connections;
             rhs.m_state = UNINITIALIZED;
-            
+
             // TODO: this needs to be updated
         }
         return *this;
     }*/
-#endif // _WEBSOCKETPP_MOVE_SEMANTICS_
 
     /// Return whether or not the endpoint produces secure connections.
     bool is_secure() const {
@@ -226,15 +215,9 @@ public:
      * @param ec Set to indicate what error occurred, if any.
      */
     void init_asio(lib::error_code & ec) {
-        // Use a smart pointer until the call is successful and ownership has 
+        // Use a smart pointer until the call is successful and ownership has
         // successfully been taken. Use unique_ptr when available.
-        // TODO: remove the use of auto_ptr when C++98/03 support is no longer
-        //       necessary.
-#ifdef _WEBSOCKETPP_CPP11_MEMORY_
         lib::unique_ptr<lib::asio::io_service> service(new lib::asio::io_service());
-#else
-        lib::auto_ptr<lib::asio::io_service> service(new lib::asio::io_service());
-#endif
         init_asio(service.get(), ec);
         if( !ec ) service.release(); // Call was successful, transfer ownership
         m_external_io_service = false;
@@ -248,15 +231,9 @@ public:
      * @see init_asio(io_service_ptr ptr)
      */
     void init_asio() {
-        // Use a smart pointer until the call is successful and ownership has 
+        // Use a smart pointer until the call is successful and ownership has
         // successfully been taken. Use unique_ptr when available.
-        // TODO: remove the use of auto_ptr when C++98/03 support is no longer
-        //       necessary.
-#ifdef _WEBSOCKETPP_CPP11_MEMORY_
         lib::unique_ptr<lib::asio::io_service> service(new lib::asio::io_service());
-#else
-        lib::auto_ptr<lib::asio::io_service> service(new lib::asio::io_service());
-#endif
         init_asio( service.get() );
         // If control got this far without an exception, then ownership has successfully been taken
         service.release();
@@ -379,7 +356,7 @@ public:
     lib::asio::io_service & get_io_service() {
         return *m_io_service;
     }
-    
+
     /// Get local TCP endpoint
     /**
      * Extracts the local endpoint from the acceptor. This represents the
@@ -387,7 +364,7 @@ public:
      *
      * Sets a bad_descriptor error if the acceptor is not currently listening
      * or otherwise unavailable.
-     * 
+     *
      * @since 0.7.0
      *
      * @param ec Set to indicate what error occurred, if any.
@@ -426,10 +403,10 @@ public:
 
         m_acceptor->open(ep.protocol(),bec);
         if (bec) {ec = clean_up_listen_after_error(bec);return;}
-        
+
         m_acceptor->set_option(lib::asio::socket_base::reuse_address(m_reuse_addr),bec);
         if (bec) {ec = clean_up_listen_after_error(bec);return;}
-        
+
         // if a TCP pre-bind handler is present, run it
         if (m_tcp_pre_bind_handler) {
             ec = m_tcp_pre_bind_handler(m_acceptor);
@@ -438,13 +415,13 @@ public:
                 return;
             }
         }
-        
+
         m_acceptor->bind(ep,bec);
         if (bec) {ec = clean_up_listen_after_error(bec);return;}
-        
+
         m_acceptor->listen(m_listen_backlog,bec);
         if (bec) {ec = clean_up_listen_after_error(bec);return;}
-        
+
         // Success
         m_state = LISTENING;
         ec = lib::error_code();
@@ -828,7 +805,7 @@ protected:
         m_elog = e;
     }
 
-    void handle_accept(accept_handler callback, lib::asio::error_code const & 
+    void handle_accept(accept_handler callback, lib::asio::error_code const &
         asio_ec)
     {
         lib::error_code ret_ec;

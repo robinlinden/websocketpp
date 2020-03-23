@@ -44,8 +44,7 @@ namespace random_device {
  * Thread-safety is provided via locking based on the concurrency template
  * parameter.
  *
- * Non-deterministic RNG is provided via websocketpp::lib which uses either
- * C++11 or Boost 1.47+'s random_device class.
+ * Non-deterministic RNG is provided via websocketpp::lib which uses C++11
  *
  * Call operator() to generate the next number
  */

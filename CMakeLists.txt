@@ -45,7 +45,6 @@ include (CMakeHelpers)
 ############  Build customization
 
 # Override from command line "CMake -D<OPTION>=TRUE/FALSE/0/1/ON/OFF"
-option (ENABLE_CPP11 "Build websocketpp with CPP11 features enabled." TRUE)
 option (BUILD_EXAMPLES "Build websocketpp examples." FALSE)
 option (BUILD_TESTS "Build websocketpp tests." FALSE)
 
@@ -59,28 +58,10 @@ if (BUILD_TESTS OR BUILD_EXAMPLES)
     set (WEBSOCKETPP_PLATFORM_TLS_LIBS "")
     set (WEBSOCKETPP_BOOST_LIBS "")
 
-    # VC9 and C++11 reasoning
-    if (ENABLE_CPP11 AND MSVC AND MSVC90)
-        message("* Detected Visual Studio 9 2008, disabling C++11 support.")
-        set (ENABLE_CPP11 FALSE)
-    endif ()
-
     # Detect clang. Not officially reported by cmake.
     execute_process(COMMAND "${CMAKE_CXX_COMPILER}" "-v" ERROR_VARIABLE CXX_VER_STDERR)
     if ("${CXX_VER_STDERR}" MATCHES ".*clang.*")
         set (CMAKE_COMPILER_IS_CLANGXX 1)
-    endif ()
-
-    # C++11 defines
-    if (ENABLE_CPP11)
-        if (MSVC)
-            add_definitions (-D_WEBSOCKETPP_CPP11_FUNCTIONAL_)
-            add_definitions (-D_WEBSOCKETPP_CPP11_SYSTEM_ERROR_)
-            add_definitions (-D_WEBSOCKETPP_CPP11_RANDOM_DEVICE_)
-            add_definitions (-D_WEBSOCKETPP_CPP11_MEMORY_)
-        else()
-            add_definitions (-D_WEBSOCKETPP_CPP11_STL_)
-        endif()
     endif ()
 
     # Visual studio
@@ -103,13 +84,6 @@ if (BUILD_TESTS OR BUILD_EXAMPLES)
         if (NOT APPLE)
             add_definitions (-DNDEBUG -Wall -Wcast-align) # todo: should we use CMAKE_C_FLAGS for these?
         endif ()
-
-        # Try to detect version. Note: Not tested!
-        execute_process (COMMAND ${CMAKE_CXX_COMPILER} "-dumpversion" OUTPUT_VARIABLE GCC_VERSION)
-        if ("${GCC_VERSION}" STRGREATER "4.4.0")
-            message("* C++11 support partially enabled due to GCC version ${GCC_VERSION}")
-            set (WEBSOCKETPP_BOOST_LIBS system thread)
-        endif ()
     endif ()
 
     # clang
@@ -131,10 +105,6 @@ if (BUILD_TESTS OR BUILD_EXAMPLES)
     if (APPLE)
         add_definitions (-DNDEBUG -Wall)
     endif ()
-
-    if (BUILD_EXAMPLES)
-        list (APPEND WEBSOCKETPP_BOOST_LIBS random)
-    endif()
 
     if (BUILD_TESTS)
         list (APPEND WEBSOCKETPP_BOOST_LIBS unit_test_framework)

@@ -118,13 +118,6 @@ _Create endpoint wrapper object that handles initialization and setting up the b
 
 In order to process user input while network processing occurs in the background we are going to use a separate thread for the WebSocket++ processing loop. This leaves the main thread free to process foreground user input. In order to enable simple RAII style resource management for our thread and endpoint we will use a wrapper object that configures them both in its constructor.
 
-> ##### Terminology: websocketpp::lib namespace
-> WebSocket++ is designed to be used with a C++11 standard library. As this is not universally available in popular build systems the Boost libraries may be used as polyfills for the C++11 standard library in C++98 build environments. The `websocketpp::lib` namespace is used by the library and its associated examples to abstract away the distinctions between the two. `websocketpp::lib::shared_ptr` will evaluate to `std::shared_ptr` in a C++11 environment and `boost::shared_ptr` otherwise.
->
-> This tutorial uses the `websocketpp::lib` wrappers because it doesn't know what the build environment of the reader is. For your applications, unless you are interested in similar portability, are free to use the boost or std versions of these types directly.
->
->[TODO: link to more information about websocketpp::lib namespace and C++11 setup]
-
 Within the `websocket_endpoint` constructor several things happen:
 
 First, we set the endpoint logging behavior to silent by clearing all of the access and error logging channels. [TODO: link to more information about logging]
@@ -146,19 +139,11 @@ m_thread.reset(new websocketpp::lib::thread(&client::run, &m_endpoint));
 
 #### Build
 
-Now that our client endpoint template is actually instantiated a few more linker dependencies will show up. In particular, WebSocket clients require a cryptographically secure random number generator. WebSocket++ is able to use either `boost_random` or the C++11 standard library <random> for this purpose. Because this example also uses threads, if we do not have C++11 std::thread available we will need to include `boost_thread`.
+##### Clang
+`clang++ -std=c++11 -stdlib=libc++ step3.cpp -lboost_system`
 
-##### Clang (C++98 & boost)
-`clang++ step3.cpp -lboost_system -lboost_random -lboost_thread`
-
-##### Clang (C++11)
-`clang++ -std=c++0x -stdlib=libc++ step3.cpp -lboost_system -D_WEBSOCKETPP_CPP11_STL_`
-
-##### G++ (C++98 & Boost)
-`g++ step3.cpp -lboost_system -lboost_random -lboost_thread`
-
-##### G++ v4.6+ (C++11)
-`g++ -std=c++0x step3.cpp -lboost_system -D_WEBSOCKETPP_CPP11_STL_`
+##### G++
+`g++ -std=c++11 step3.cpp -lboost_system`
 
 #### Code so far
 
@@ -257,7 +242,7 @@ A new WebSocket connection is initiated via a three step process. First, a conne
 `websocket_endpoint::connect()` begins by calling `endpoint::get_connection()` using a uri passed as a parameter. Additionally, an error output value is passed to capture any errors that might occur during. If an error does occur an error notice is printed along with a descriptive message and the -1 / 'invalid' value is returned as the new ID.
 
 > ###### Terminology: `error handling: exceptions vs error_code`
-> WebSocket++ uses the error code system defined by the C++11 `<system_error>` library. It can optionally fall back to a similar system provided by the Boost libraries. All user facing endpoint methods that can fail take an `error_code` in an output parameter and store the error that occured there before returning. An empty/default constructed value is returned in the case of success.
+> WebSocket++ uses the error code system defined by the C++11 `<system_error>` library. All user facing endpoint methods that can fail take an `error_code` in an output parameter and store the error that occured there before returning. An empty/default constructed value is returned in the case of success.
 >
 > **Exception throwing varients**
 > All user facing endpoint methods that take and use an `error_code` parameter have a version that throws an exception instead. These methods are identical in function and signature except for the lack of the final ec parameter. The type of the exception thrown is `websocketpp::exception`. This type derives from `std::exception` so it can be caught by catch blocks grabbing generic `std::exception`s. The `websocketpp::exception::code()` method may be used to extract the machine readable `error_code` value from an exception.
@@ -558,8 +543,8 @@ void on_close(client * c, websocketpp::connection_hdl hdl) {
     m_status = "Closed";
     client::connection_ptr con = c->get_con_from_hdl(hdl);
     std::stringstream s;
-    s << "close code: " << con->get_remote_close_code() << " (" 
-      << websocketpp::close::status::get_string(con->get_remote_close_code()) 
+    s << "close code: " << con->get_remote_close_code() << " ("
+      << websocketpp::close::status::get_string(con->get_remote_close_code())
       << "), close reason: " << con->get_remote_close_reason();
     m_error_reason = s.str();
 }
@@ -574,13 +559,13 @@ This method starts by looking up the given connection ID in the connection list.
 ~~~{.cpp}
 void close(int id, websocketpp::close::status::value code) {
     websocketpp::lib::error_code ec;
-    
+
     con_list::iterator metadata_it = m_connection_list.find(id);
     if (metadata_it == m_connection_list.end()) {
         std::cout << "> No connection found with id " << id << std::endl;
         return;
     }
-    
+
     m_endpoint.close(metadata_it->second->get_hdl(), code, "", ec);
     if (ec) {
         std::cout << "> Error initiating close: " << ec.message() << std::endl;
@@ -597,15 +582,15 @@ An entry is also added to the help system to describe how the new command may be
 ~~~{.cpp}
 else if (input.substr(0,5) == "close") {
     std::stringstream ss(input);
-    
+
     std::string cmd;
     int id;
     int close_code = websocketpp::close::status::normal;
     std::string reason;
-    
+
     ss >> cmd >> id >> close_code;
     std::getline(ss,reason);
-    
+
     endpoint.close(id, close_code, reason);
 }
 ~~~
@@ -619,23 +604,23 @@ The destructor for `websocket_endpoint` now stops perpetual mode (so the run thr
 ~~~{.cpp}
 ~websocket_endpoint() {
     m_endpoint.stop_perpetual();
-    
+
     for (con_list::const_iterator it = m_connection_list.begin(); it != m_connection_list.end(); ++it) {
         if (it->second->get_status() != "Open") {
             // Only close open connections
             continue;
         }
-        
+
         std::cout << "> Closing connection " << it->second->get_id() << std::endl;
-        
+
         websocketpp::lib::error_code ec;
         m_endpoint.close(it->second->get_hdl(), websocketpp::close::status::going_away, "", ec);
         if (ec) {
-            std::cout << "> Error closing connection " << it->second->get_id() << ": "  
+            std::cout << "> Error closing connection " << it->second->get_id() << ": "
                       << ec.message() << std::endl;
         }
     }
-    
+
     m_thread->join();
 }
 ~~~
@@ -670,13 +655,13 @@ _Sending and receiving messages_
 This step adds a command to send a message on a given connection and updates the show command to print a transcript of all sent and received messages for that connection.
 
 > ##### Terminology: WebSocket message types (opcodes)
-> WebSocket messages have types indicated by their opcode. The protocol currently specifies two different opcodes for data messages, text and binary. Text messages represent UTF8 text and will be validated as such. Binary messages represent raw binary bytes and are passed through directly with no validation. 
+> WebSocket messages have types indicated by their opcode. The protocol currently specifies two different opcodes for data messages, text and binary. Text messages represent UTF8 text and will be validated as such. Binary messages represent raw binary bytes and are passed through directly with no validation.
 >
 > WebSocket++ provides the values `websocketpp::frame::opcode::text` and `websocketpp::frame::opcode::binary` that can be used to direct how outgoing messages should be sent and to check how incoming messages are formatted.
 
 #### Sending Messages
 
-Messages are sent using `endpoint::send`. This is a thread safe method that may be called from anywhere to queue a message for sending on the specified connection. There are three send overloads for use with different scenarios. 
+Messages are sent using `endpoint::send`. This is a thread safe method that may be called from anywhere to queue a message for sending on the specified connection. There are three send overloads for use with different scenarios.
 
 Each method takes a `connection_hdl` to indicate which connection to send the message on as well as a `frame::opcode::value` to indicate which opcode to label the message as. All overloads are also available with an exception free varient that fills in a a status/error code instead of throwing.
 
@@ -700,19 +685,19 @@ Like the close method, send will start by looking up the given connection ID in 
 ~~~{.cpp}
 void send(int id, std::string message) {
     websocketpp::lib::error_code ec;
-    
+
     con_list::iterator metadata_it = m_connection_list.find(id);
     if (metadata_it == m_connection_list.end()) {
         std::cout << "> No connection found with id " << id << std::endl;
         return;
     }
-    
+
     m_endpoint.send(metadata_it->second->get_hdl(), message, websocketpp::frame::opcode::text, ec);
     if (ec) {
         std::cout << "> Error sending message: " << ec.message() << std::endl;
         return;
     }
-    
+
     metadata_it->second->record_sent_message(message);
 }
 ~~~
@@ -724,14 +709,14 @@ A send option is added to the command loop. It takes a connection ID and a text 
 ~~~{.cpp}
 else if (input.substr(0,4) == "send") {
     std::stringstream ss(input);
-        
+
         std::string cmd;
         int id;
         std::string message = "";
-        
+
         ss >> cmd >> id;
         std::getline(ss,message);
-        
+
         endpoint.send(id, message);
 }
 ~~~

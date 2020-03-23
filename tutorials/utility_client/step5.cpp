@@ -68,13 +68,13 @@ public:
         m_server = con->get_response_header("Server");
         m_error_reason = con->get_ec().message();
     }
-    
+
     void on_close(client * c, websocketpp::connection_hdl hdl) {
         m_status = "Closed";
         client::connection_ptr con = c->get_con_from_hdl(hdl);
         std::stringstream s;
-        s << "close code: " << con->get_remote_close_code() << " (" 
-          << websocketpp::close::status::get_string(con->get_remote_close_code()) 
+        s << "close code: " << con->get_remote_close_code() << " ("
+          << websocketpp::close::status::get_string(con->get_remote_close_code())
           << "), close reason: " << con->get_remote_close_reason();
         m_error_reason = s.str();
     }
@@ -82,11 +82,11 @@ public:
     websocketpp::connection_hdl get_hdl() const {
         return m_hdl;
     }
-    
+
     int get_id() const {
         return m_id;
     }
-    
+
     std::string get_status() const {
         return m_status;
     }
@@ -124,23 +124,23 @@ public:
 
     ~websocket_endpoint() {
         m_endpoint.stop_perpetual();
-        
+
         for (con_list::const_iterator it = m_connection_list.begin(); it != m_connection_list.end(); ++it) {
             if (it->second->get_status() != "Open") {
                 // Only close open connections
                 continue;
             }
-            
+
             std::cout << "> Closing connection " << it->second->get_id() << std::endl;
-            
+
             websocketpp::lib::error_code ec;
             m_endpoint.close(it->second->get_hdl(), websocketpp::close::status::going_away, "", ec);
             if (ec) {
-                std::cout << "> Error closing connection " << it->second->get_id() << ": "  
+                std::cout << "> Error closing connection " << it->second->get_id() << ": "
                           << ec.message() << std::endl;
             }
         }
-        
+
         m_thread->join();
     }
 
@@ -184,13 +184,13 @@ public:
 
     void close(int id, websocketpp::close::status::value code, std::string reason) {
         websocketpp::lib::error_code ec;
-        
+
         con_list::iterator metadata_it = m_connection_list.find(id);
         if (metadata_it == m_connection_list.end()) {
             std::cout << "> No connection found with id " << id << std::endl;
             return;
         }
-        
+
         m_endpoint.close(metadata_it->second->get_hdl(), code, reason, ec);
         if (ec) {
             std::cout << "> Error initiating close: " << ec.message() << std::endl;
@@ -242,15 +242,15 @@ int main() {
             }
         } else if (input.substr(0,5) == "close") {
             std::stringstream ss(input);
-            
+
             std::string cmd;
             int id;
             int close_code = websocketpp::close::status::normal;
             std::string reason;
-            
+
             ss >> cmd >> id >> close_code;
             std::getline(ss,reason);
-            
+
             endpoint.close(id, close_code, reason);
         }  else if (input.substr(0,4) == "show") {
             int id = atoi(input.substr(5).c_str());
@@ -271,10 +271,10 @@ int main() {
 
 /*
 
-clang++ -std=c++11 -stdlib=libc++ -I/Users/zaphoyd/software/websocketpp/ -I/Users/zaphoyd/software/boost_1_55_0/ -D_WEBSOCKETPP_CPP11_STL_ step4.cpp /Users/zaphoyd/software/boost_1_55_0/stage/lib/libboost_system.a
+clang++ -std=c++11 -stdlib=libc++ -I/Users/zaphoyd/software/websocketpp/ -I/Users/zaphoyd/software/boost_1_55_0/ step4.cpp /Users/zaphoyd/software/boost_1_55_0/stage/lib/libboost_system.a
 
 clang++ -I/Users/zaphoyd/software/websocketpp/ -I/Users/zaphoyd/software/boost_1_55_0/ step4.cpp /Users/zaphoyd/software/boost_1_55_0/stage/lib/libboost_system.a /Users/zaphoyd/software/boost_1_55_0/stage/lib/libboost_thread.a /Users/zaphoyd/software/boost_1_55_0/stage/lib/libboost_random.a
 
-clang++ -std=c++11 -stdlib=libc++ -I/Users/zaphoyd/Documents/websocketpp/ -I/Users/zaphoyd/Documents/boost_1_53_0_libcpp/ -D_WEBSOCKETPP_CPP11_STL_ step4.cpp /Users/zaphoyd/Documents/boost_1_53_0_libcpp/stage/lib/libboost_system.a
+clang++ -std=c++11 -stdlib=libc++ -I/Users/zaphoyd/Documents/websocketpp/ -I/Users/zaphoyd/Documents/boost_1_53_0_libcpp/ step4.cpp /Users/zaphoyd/Documents/boost_1_53_0_libcpp/stage/lib/libboost_system.a
 
 */

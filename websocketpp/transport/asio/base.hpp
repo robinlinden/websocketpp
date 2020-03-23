@@ -29,7 +29,6 @@
 #define WEBSOCKETPP_TRANSPORT_ASIO_BASE_HPP
 
 #include <websocketpp/common/asio.hpp>
-#include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/common/functional.hpp>
 #include <websocketpp/common/system_error.hpp>
 #include <websocketpp/common/type_traits.hpp>
@@ -52,13 +51,11 @@ namespace asio {
 class handler_allocator {
 public:
     static const size_t size = 1024;
-    
+
     handler_allocator() : m_in_use(false) {}
 
-#ifdef _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
 	handler_allocator(handler_allocator const & cpy) = delete;
 	handler_allocator & operator =(handler_allocator const &) = delete;
-#endif
 
     void * allocate(std::size_t memsize) {
         if (!m_in_use && memsize < size) {
@@ -183,7 +180,7 @@ enum value {
 /// Asio transport error category
 class category : public lib::error_category {
 public:
-    char const * name() const _WEBSOCKETPP_NOEXCEPT_TOKEN_ {
+    char const * name() const noexcept {
         return "websocketpp.transport.asio";
     }
 
@@ -223,10 +220,10 @@ inline lib::error_code make_error_code(error::value e) {
 } // namespace transport
 } // namespace websocketpp
 
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_START_
+namespace std {
 template<> struct is_error_code_enum<websocketpp::transport::asio::error::value>
 {
     static bool const value = true;
 };
-_WEBSOCKETPP_ERROR_CODE_ENUM_NS_END_
+}
 #endif // WEBSOCKETPP_TRANSPORT_ASIO_HPP
