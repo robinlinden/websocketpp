@@ -1,22 +1,44 @@
 language: cpp
 compiler:
   - gcc
+
 addons:
   apt:
-    packages:
+    packages: &common-apt-packages
       - libboost-random1.58-dev
       - libboost-system1.58-dev
       - libboost-test1.58-dev
       - libboost-thread1.58-dev
-      - python3-pip
-install:
-  - python3 -m pip install pip==19.3.1 --upgrade
-  - python3 -m pip install cmake==3.16.3 ninja==1.9.0.post1 --upgrade --user
-before_script:
-  - cmake --version
-  - ninja --version
-  - mkdir build && cd build
-script:
-  - cmake .. -GNinja -DBUILD_TESTS=TRUE -DBUILD_EXAMPLES=TRUE -DCMAKE_BUILD_TYPE=Debug
-  - cmake --build . --parallel 2
-  - ctest --output-on-failure
+
+matrix:
+  include:
+    - name: cmake-gcc
+      addons:
+        apt:
+          packages:
+            - *common-apt-packages
+            - python3-pip
+      install:
+        - python3 -m pip install pip==19.3.1 --upgrade
+        - python3 -m pip install cmake==3.16.3 ninja==1.9.0.post1 --upgrade --user
+      before_script:
+        - cmake --version
+        - ninja --version
+        - mkdir build && cd build
+      script:
+        - cmake .. -GNinja -DBUILD_TESTS=TRUE -DBUILD_EXAMPLES=TRUE -DCMAKE_BUILD_TYPE=Debug
+        - cmake --build . --parallel 2
+        - ctest --output-on-failure
+
+    - name: scons-gcc
+      addons:
+        apt:
+          packages:
+            - *common-apt-packages
+            - scons
+      env:
+        - BOOST_INCLUDES=/usr/include
+        - BOOST_LIBS=/usr/lib/x86_64-linux-gnu
+      script:
+        - scons -j2
+        - scons test
