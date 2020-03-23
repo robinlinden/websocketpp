@@ -63,12 +63,7 @@ endmacro ()
 # Build executable and register as test
 macro (build_test TARGET_NAME)
     build_executable (${TARGET_NAME} ${ARGN})
-
-    if (${CMAKE_VERSION} VERSION_LESS 3)
-        message(WARNING "CMake too old to register ${TARGET_NAME} as a test")
-    else ()
-        add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
-    endif ()
+    add_test(NAME ${TARGET_NAME} COMMAND $<TARGET_FILE:${TARGET_NAME}>)
 endmacro ()
 
 # Finalize target for all types
